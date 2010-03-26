@@ -22,3 +22,23 @@ Lerda <flerda@gmail.com> or Pietro Abate <pietro.abate@pps.jussieu.fr>
 Copyright:
      Flavio Lerda 2007 - 2009 (c)
      Pietro Abate 2009 (c)
+
+Install and use
+===============
+
+To compile MiniSat-ocaml you need the minisat solver (compiled as a dynamic
+library) installed on the system. On debian, the pakage minisat2 contains both
+the dynamic library and headers.
+
+$ aptitude install minisat2
+$ make
+
+To test it :
+$./solver.byte examples/1.formula 
+Verified 1 original clauses.
+Solving examples/1.formula...
+sat
+  b=false
+  a=false
+
+enjoy !
