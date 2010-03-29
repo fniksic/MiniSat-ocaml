@@ -11,8 +11,8 @@ RESULTS_OPT = $(LIBS_OPT) $(PROGS_OPT)
 SOURCES = $(wildcard *.ml *.mli)
 
 OCAMLBUILD = ocamlbuild
-# OBFLAGS = -classic-display
-OBFLAGS =
+OBFLAGS = -classic-display
+#OBFLAGS =
 OCAMLFIND = ocamlfind
 
 DESTDIR =

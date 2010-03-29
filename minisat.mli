@@ -26,6 +26,11 @@ class solver :
      * satisfied constraints *)
     method simplify : unit
 
+    (* [confict] expresses which of the assumptions given by the user where sufficient 
+     * to derive a contradiction. If you have not given assumptions, this set will
+     * be empty. *)
+    method conflict : lit list
+
     (** find a solution to the current sat problem *)
     method solve : solution
 

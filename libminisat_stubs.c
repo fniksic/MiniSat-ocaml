@@ -20,12 +20,41 @@ extern "C"
   CAMLprim value minisat_neg_lit(value v);
   CAMLprim value minisat_add_clause(value solver, value c);
   CAMLprim value minisat_simplify(value solver);
+  CAMLprim value minisat_conflict(value solver);
   CAMLprim value minisat_solve(value solver);
   CAMLprim value minisat_solve_with_assumption(value solver, value a);
   CAMLprim value minisat_value_of(value solver, value v);
 }
 
-static void convert_literals(value l, vec<Lit> &r) {
+#define Val_none Val_int(0)
+
+static inline value Val_some( value v )
+{
+  CAMLparam1( v );
+  CAMLlocal1( some );
+  some = caml_alloc(1, 0);
+  Store_field( some, 0, v );
+  CAMLreturn(some) ;
+}
+
+static inline value tuple( value a, value b) {
+  CAMLparam2( a, b );
+  CAMLlocal1( tuple );
+
+  tuple = caml_alloc(2, 0);
+
+  Store_field( tuple, 0, a );
+  Store_field( tuple, 1, b );
+
+  CAMLreturn(tuple);
+}
+
+static inline value append( value hd, value tl ) {
+  CAMLparam2( hd , tl );
+  CAMLreturn(tuple( hd, tl ));
+}
+
+static inline void convert_literals(value l, vec<Lit> &r) {
   while(Int_val(l) != 0) {
     Lit lit = toLit(Int_val(Field(l, 0)));
     r.push(lit);
@@ -102,6 +131,21 @@ CAMLprim value minisat_simplify(value solver) {
   CAMLreturn(result);
 }
 
+CAMLprim value minisat_conflict(value solver) {
+  CAMLparam1 (solver);
+  CAMLlocal2 ( hd, tl );
+  tl = Val_emptylist;
+
+  Solver* _solver = solver_val(solver);
+  vec<Lit>& l = _solver->conflict;
+  for (int i = 0; i < l.size(); i++) {
+    hd = Val_int(toInt(l[i]));
+    tl = append(hd,tl); 
+  }
+
+  CAMLreturn(tl);
+}
+
 CAMLprim value minisat_solve(value solver) {
   CAMLparam1 (solver);
   CAMLlocal1 (result);
@@ -141,7 +185,7 @@ CAMLprim value minisat_value_of(value solver, value v) {
   Solver* _solver = solver_val(solver);
 
   Var var = Int_val(v);
-  lbool val = _solver->model[var];
+  lbool val = _solver->value(var);
 
   if(val == l_False) {
     result = Val_int(0);
@@ -155,4 +199,3 @@ CAMLprim value minisat_value_of(value solver, value v) {
 
   CAMLreturn(result);
 }
-

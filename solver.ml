@@ -110,7 +110,9 @@ let solve file =
   let solver = new solver in
   let vars = process_file solver file in 
   match solver#solve with
-  | Minisat.UNSAT -> printf "unsat\n"
+  | Minisat.UNSAT -> 
+      printf "unsat\n";
+      List.iter (printf "i %d") solver#conflict
   | Minisat.SAT   ->
       printf "sat\n";
       Hashtbl.iter
