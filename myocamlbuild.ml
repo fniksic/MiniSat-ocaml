@@ -11,7 +11,7 @@
 (**************************************************************************)
 
 open Ocamlbuild_plugin
-open Command (* no longer needed for OCaml >= 3.10.2 *)
+(* open Command (* no longer needed for OCaml >= 3.10.2 *) *)
 
 let clibs = [("minisat","minisat")]
 
@@ -71,16 +71,24 @@ let _ = dispatch begin function
 
        List.iter begin fun (lib,dir) ->
          flag ["ocaml"; "link"; "c_use_"^lib; "byte"]
-         (S[A"-custom"; (* A"-cclib"; A"-lstdc++"; *) A"-ccopt"; A("-L"^lib); A"-cclib"; A("-l"^lib)]);
+         (S[A"-custom"; (* A"-cclib"; A"-lstdc++"; *)
+            A"-cclib"; A"-lz";
+            A"-ccopt"; A("-L"^lib); 
+            A"-cclib"; A("-l"^lib)]);
 
          flag ["ocaml"; "link"; "c_use_"^lib; "native"]
-         (S[A"-cclib"; A"-lstdc++"; A"-ccopt"; A("-L"^lib); A"-cclib"; A("-l"^lib)]);
+         (S[(* A"-cclib"; A"-lstdc++"; *) 
+            A"-cclib"; A"-lz"; 
+            A"-ccopt"; A("-L"^lib); 
+            A"-cclib"; A("-l"^lib)]);
 
          flag [ "byte"; "library"; "link" ]
-         (S[A"-dllib"; A("-l"^lib); A"-cclib"; A("-l"^lib^"stubs")]);
+         (S[A"-dllib"; A("-l"^lib); 
+            A"-cclib"; A("-l"^lib^"stubs")]);
 
          flag [ "native"; "library"; "link" ]
-         (S[A"-cclib"; A("-l"^lib); A"-cclib"; A("-l"^lib^"_stubs")]);
+         (S[A"-cclib"; A("-l"^lib); 
+            A"-cclib"; A("-l"^lib^"_stubs")]);
 
          (* Make sure the C pieces is built... *)
          if Sys.file_exists dir then begin

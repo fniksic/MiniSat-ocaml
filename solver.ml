@@ -1,9 +1,9 @@
 
 
 (* To use printf without referencing the model name *)
-open Printf
+(* open Printf
 open Minisat
-
+*)
 (*
  * Returns the string obtained from [str] by dropping the first
  * [n] characters. [n] must be smaller than or equal to the length
@@ -35,6 +35,7 @@ let split str ch =
       List.rev (str::l)
   in
   split' str []
+;;
 
 (*
  * Processes the content of [file], adds the variables and clauses to Minisat
@@ -104,20 +105,21 @@ let process_file solver file =
 
   process_line ();
   vars
+;;
 
 (* Reads a given file and solves the instance. *)
 let solve file =
-  let solver = new solver in
+  let solver = new Minisat.solver in
   let vars = process_file solver file in 
   match solver#solve with
   | Minisat.UNSAT -> 
-      printf "unsat\n";
-      List.iter (printf "i %d") solver#conflict
+      Printf.printf "unsat\n";
+      List.iter (Printf.printf "i %d") solver#conflict
   | Minisat.SAT   ->
-      printf "sat\n";
+      Printf.printf "sat\n";
       Hashtbl.iter
         (fun name v ->
-          printf "  %s=%s\n"
+          Printf.printf "  %s=%s\n"
             name
             (Minisat.string_of_value (solver#value_of v)) 
         )
@@ -130,17 +132,19 @@ let solve file =
  *)
 let main () =
   let argc = Array.length Sys.argv in
+  Printf.eprintf "ddddddddddddd%!\n";
   if argc = 1 then
     solve stdin
   else
     Array.iter
       (fun fname ->
         try
-          printf "Solving %s...\n" fname;
+          Printf.printf "Solving %s...\n" fname;
           solve (open_in fname)
         with Sys_error msg ->
-          printf "ERROR: %s\n" msg
+          Printf.printf "ERROR: %s\n" msg
       )
       (Array.sub Sys.argv 1 (argc-1))
+;;
 
-let () = main ()
+main () ;;

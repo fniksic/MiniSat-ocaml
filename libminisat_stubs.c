@@ -1,5 +1,9 @@
 
+#define __STDC_LIMIT_MACROS
+#define __STDC_FORMAT_MACROS
 #include <minisat2/Solver.h>
+
+using namespace Minisat;
 
 extern "C"
 {
@@ -92,14 +96,14 @@ CAMLprim value minisat_new_var(value solver) {
 
 CAMLprim value minisat_pos_lit(value v) {
   Var var = Int_val(v);
-  Lit lit(var, false);
-  return Val_int(toInt(lit));
+//  Lit lit(var, false);
+  return Val_int(toInt(~mkLit(var)));
 }
 
 CAMLprim value minisat_neg_lit(value v) {
   Var var = Int_val(v);
-  Lit lit(var, true);
-  return Val_int(toInt(lit));
+//  Lit lit(var, true);
+  return Val_int(toInt(mkLit(var)));
 }
 
 CAMLprim value minisat_add_clause(value solver, value c) {
