@@ -117,11 +117,12 @@ let solve file =
       List.iter (Printf.printf "i %d") solver#conflict
   | Minisat.SAT   ->
       Printf.printf "sat\n";
+      let model = solver#model in
       Hashtbl.iter
         (fun name v ->
-          Printf.printf "  %s=%s\n"
+          Printf.printf "  %s=%d\n"
             name
-            (Minisat.string_of_value (solver#value_of v)) 
+            ((* Minisat.string_of_value  *)(model.(v))) 
         )
         vars
 ;;
@@ -132,7 +133,6 @@ let solve file =
  *)
 let main () =
   let argc = Array.length Sys.argv in
-  Printf.eprintf "ddddddddddddd%!\n";
   if argc = 1 then
     solve stdin
   else

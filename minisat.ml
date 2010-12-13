@@ -3,18 +3,26 @@ type minisat
 type var = int
 type lit = int
 type value = False | True | Unknown
-type solution = SAT | UNSAT
+type solution = UNSAT | SAT
 
 external create : unit -> minisat = "minisat_new"
 external destroy : minisat -> unit = "minisat_del"
+
 external new_var : minisat -> var = "minisat_new_var"
+
 external pos_lit : var -> lit = "minisat_pos_lit"
 external neg_lit : var -> lit = "minisat_neg_lit"
+
 external add_clause : minisat -> lit list -> unit = "minisat_add_clause"
+
 external simplify : minisat -> unit = "minisat_simplify"
+
 external conflict : minisat -> lit list = "minisat_conflict"
+external model : minisat -> lit array = "minisat_model"
+
 external solve : minisat -> solution = "minisat_solve"
 external solve_with_assumption : minisat -> lit list -> solution = "minisat_solve_with_assumption"
+
 external __value_of : minisat -> var -> int = "minisat_value_of"
 
 class solver = object (self)
@@ -23,6 +31,7 @@ class solver = object (self)
   method add_clause l = add_clause solver l
   method simplify = simplify solver
   method conflict = conflict solver
+  method model = model solver
   method solve = solve solver
   method solve_with_assumption l = solve_with_assumption solver l
   method value_of v =
