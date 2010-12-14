@@ -27,8 +27,10 @@ Install and use
 ===============
 
 To compile MiniSat-ocaml you need the minisat solver (compiled as a dynamic
-library) installed on the system. On debian, the pakage minisat2 contains both
-the dynamic library and headers.
+library) installed on the system. On debian, the package minisat2 contains both
+the dynamic library and headers. Recently the minisat2 package in debian unstable
+has few problems. See #606846 and #606643 on the debian bts for details. Until 
+these problems are fixed these bindings will not compile on debian.
 
 $ aptitude install minisat2
 $ make
