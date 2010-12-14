@@ -2,4 +2,6 @@
 
 v a
 v b
-c a -b
+v c
+c -a c
+c -a -b

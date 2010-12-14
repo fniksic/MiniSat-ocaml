@@ -82,7 +82,7 @@ let process_file solver file =
           )
           lits
     in
-    solver#add_clause clause
+    ignore(solver#add_clause clause)
   in
 
   (* Read a new line and processes its content. *)
@@ -111,20 +111,20 @@ let process_file solver file =
 let solve file =
   let solver = new Minisat.solver in
   let vars = process_file solver file in 
-  match solver#solve with
-  | Minisat.UNSAT -> 
-      Printf.printf "unsat\n";
-      List.iter (Printf.printf "i %d") solver#conflict
-  | Minisat.SAT   ->
-      Printf.printf "sat\n";
+  if solver#solve then begin
+    Printf.printf "sat\n";
       let model = solver#model in
       Hashtbl.iter
         (fun name v ->
-          Printf.printf "  %s=%d\n"
-            name
-            ((* Minisat.string_of_value  *)(model.(v))) 
+          Printf.printf "%d%!\n" v;
+          Printf.printf "  %s=%s\n" name (Minisat.string_of_lbool model.(v))
         )
         vars
+  end
+  else begin
+    Printf.printf "unsat\n";
+    ignore(solver#conflict)
+  end
 ;;
 
 (*
