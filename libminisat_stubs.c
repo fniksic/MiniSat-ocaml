@@ -22,7 +22,7 @@ extern "C"
   CAMLprim value minisat_new_var(value solver);
   CAMLprim value minisat_pos_lit(value v);
   CAMLprim value minisat_neg_lit(value v);
-  CAMLprim value minisat_add_clause(value solver, value c);
+  CAMLprim value minisat_add_clause(value solver, value clause);
   CAMLprim value minisat_simplify(value solver);
   CAMLprim value minisat_conflict(value solver);
   CAMLprim value minisat_model(value solver);
@@ -34,6 +34,8 @@ extern "C"
 
 #define Val_none Val_int(0)
 #define Val_lbool(v) Val_int(toInt(v))
+
+#define solver_val(v) ((Solver*)(Field((v), 0)))
 
 static inline value Val_some( value v ) {
   CAMLparam1(v);
@@ -60,11 +62,22 @@ static inline value append( value hd, value tl ) {
   CAMLreturn(tuple( hd, tl ));
 }
 
-static inline void convert_literals(value l, vec<Lit> &r) {
-  while(Int_val(l) != 0) {
-    r.push(toLit(Int_val(Field(l, 0))));
-    l = Field(l, 1);
+static inline void clause_val(value arr, vec<Lit>& clause) {
+
+  for (int i = 0; i < Wosize_val(arr); i++) {
+    clause.push(toLit(Int_val(Field(arr, i))));
   }
+  return;
+
+}
+
+CAMLprim value Val_clause(vec<Lit>& clause) {
+  value arr;
+  arr = caml_alloc(clause.size(), 0);
+  for (int i = 0; i < clause.size(); i++) {
+    Store_field(arr, i, Val_int(toInt(clause[i])));
+  }
+  return arr;
 }
 
 CAMLprim value minisat_new(value unit) {
@@ -77,7 +90,6 @@ CAMLprim value minisat_new(value unit) {
   CAMLreturn(result);
 }
 
-#define solver_val(v) ((Solver*)(Field((v), 0)))
 
 CAMLprim value minisat_del(value solver) {
   CAMLparam1 (solver);
@@ -94,28 +106,25 @@ CAMLprim value minisat_new_var(value solver) {
   CAMLreturn(Val_int(_solver->newVar()));
 }
 
-#define Val_lit(v,p) Val_int(toInt(mkLit(Int_val(v),p)))
 
 CAMLprim value minisat_pos_lit(value v) {
   CAMLparam0 ();
-  CAMLreturn(Val_lit(v,true));
+  CAMLreturn(Val_int(toInt(mkLit(Int_val(v),true))));
 }
 
 CAMLprim value minisat_neg_lit(value v) {
   CAMLparam0 ();
-  CAMLreturn(Val_lit(v,false));
+  CAMLreturn(Val_int(toInt(mkLit(Int_val(v),false))));
 }
 
-CAMLprim value minisat_add_clause(value solver, value c) {
-  CAMLparam2 (solver, c);
+CAMLprim value minisat_add_clause(value solver, value clause) {
+  CAMLparam2 (solver, clause);
   CAMLlocal1 (result);
+  vec<Lit> c;
 
   Solver* _solver = solver_val(solver);
-
-  vec<Lit> clause;
-  convert_literals(c, clause);
-
-  CAMLreturn(Val_bool(_solver->addClause(clause)));
+  clause_val(clause,c);
+  CAMLreturn(Val_bool(_solver->addClause(c)));
 }
 
 CAMLprim value minisat_simplify(value solver) {
@@ -128,19 +137,15 @@ CAMLprim value minisat_simplify(value solver) {
 // this vector represent the final conflict clause expressed in the assumptions.
 CAMLprim value minisat_conflict(value solver) {
   CAMLparam1 (solver);
-  CAMLlocal2 ( hd, tl );
-  tl = Val_emptylist;
+  CAMLlocal1 (arr);
+  arr = caml_alloc(0, 0);
 
   Solver* _solver = solver_val(solver);
   if (!_solver->okay()) {
-    vec<Lit>& l = _solver->conflict;
-    for (int i = 0; i < l.size(); i++) {
-      hd = Val_int(toInt(l[i]));
-      tl = append(hd,tl); 
-    }
+    arr = Val_clause(_solver->conflict);
   }
 
-  CAMLreturn(tl);
+  CAMLreturn(arr);
 }
 
 // If problem is satisfiable, this vector contains the model (if any).
@@ -165,7 +170,6 @@ CAMLprim value minisat_model(value solver) {
 // possible to find a solution within the allocated resources
 CAMLprim value minisat_solveLimited(value solver) {
   CAMLparam1 (solver);
-  CAMLlocal1 (result);
   vec<Lit> dummy;
 
   Solver* _solver = solver_val(solver);
@@ -175,23 +179,20 @@ CAMLprim value minisat_solveLimited(value solver) {
 
 CAMLprim value minisat_solve(value solver) {
   CAMLparam1 (solver);
-  CAMLlocal1 (result);
-  vec<Lit> dummy;
 
   Solver* _solver = solver_val(solver);
 
   CAMLreturn(Val_bool(_solver->solve()));
 }
 
-CAMLprim value minisat_solve_with_assumption(value solver, value a) {
-  CAMLparam2 (solver, a);
-  CAMLlocal1 (result);
-  vec<Lit> ass;
+CAMLprim value minisat_solve_with_assumption(value solver, value clause) {
+  CAMLparam2 (solver, clause);
+  vec<Lit> assumptions;
 
-  convert_literals(a, ass);
+  clause_val(clause,assumptions);
   Solver* _solver = solver_val(solver);
 
-  CAMLreturn(Val_bool(_solver->solve(ass)));
+  CAMLreturn(Val_bool(_solver->solve(assumptions)));
 }
 
 CAMLprim value minisat_value_of(value solver, value v) {

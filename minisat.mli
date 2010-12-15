@@ -13,6 +13,7 @@ type lit
 
 (** the value of a literal can be either True, False or Unknown *)
 type lbool = True | False | Unknown
+type clause = lit array
 
 class solver :
   object
@@ -20,7 +21,7 @@ class solver :
 
     (** add a clause to the set of problem constraints. A clause is 
      * a conjunction of positive and negative literals *)
-    method add_clause : lit list -> bool
+    method add_clause : clause -> bool
 
     (** create a new variable *)
     method new_var : var
@@ -32,7 +33,7 @@ class solver :
     method solve : bool
 
     (** Search for a model that respects a given set of assumptions. *)
-    method solve_with_assumption : lit list -> bool
+    method solve_with_assumption : clause -> bool
 
     (** The value of a variable in the last model. The last call to solve must
         have been satisfiable *)
@@ -44,7 +45,7 @@ class solver :
     (** If problem is unsatisfiable (possibly under assumptions),
          this vector represent the final conflict clause expressed in the
          assumptions. *)
-    method conflict : lit list
+    method conflict : clause
 
     (** The current number of variables. *)
     (* method nvar : int *)
@@ -52,6 +53,8 @@ class solver :
 
 (** convert a value to a string *)
 val string_of_lbool : lbool -> string
+
+val mkLit : (var * bool) -> lit
 
 (** given a variable, returns a positive literal *)
 external pos_lit : var -> lit = "minisat_pos_lit"

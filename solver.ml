@@ -62,25 +62,21 @@ let process_file solver file =
     assert (l > 2);
     assert (line.[1] = ' ');
     let lits =
-        List.map
-          (fun lit ->
+        List.map (fun lit ->
             if lit.[0] = '-' then
               (false, drop lit 1)
             else
               (true, lit)
-          )
-          (split (drop line 2) ' ')
+        ) (split (drop line 2) ' ')
     in
     let clause =
-        List.map
-          (fun (sign, name) ->
+        Array.map (fun (sign, name) ->
             let var = Hashtbl.find vars name in
             if sign then
               Minisat.pos_lit var
             else
               Minisat.neg_lit var
-          )
-          lits
+        ) (Array.of_list lits)
     in
     ignore(solver#add_clause clause)
   in
