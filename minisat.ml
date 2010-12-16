@@ -12,6 +12,10 @@ external new_var : minisat -> var = "minisat_new_var"
 
 external pos_lit : var -> lit = "minisat_pos_lit"
 external neg_lit : var -> lit = "minisat_neg_lit"
+external mklit : var -> bool -> lit = "minisat_mklit"
+
+external lit_to_var : lit -> var = "minisat_lit_to_var"
+external lit_sign : lit -> bool = "minisat_lit_sign"
 
 external add_clause : minisat -> clause -> bool = "minisat_add_clause"
 
@@ -29,10 +33,6 @@ external solve_with_assumption :
   minisat -> clause -> bool = "minisat_solve_with_assumption"
 
 external value_of : minisat -> var -> lbool = "minisat_value_of"
-
-let mkLit = function
-  |(v,true) -> pos_lit v
-  |(v,false) -> neg_lit v
 
 class solver = object (self)
   val solver = create ()

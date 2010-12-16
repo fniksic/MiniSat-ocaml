@@ -54,10 +54,14 @@ class solver :
 (** convert a value to a string *)
 val string_of_lbool : lbool -> string
 
-val mkLit : (var * bool) -> lit
+external mklit : var -> bool -> lit = "minisat_mklit"
 
 (** given a variable, returns a positive literal *)
 external pos_lit : var -> lit = "minisat_pos_lit"
 
 (** given a variable, returns a negative literal *)
 external neg_lit : var -> lit = "minisat_neg_lit"
+
+external lit_to_var : lit -> var = "minisat_lit_to_var"
+
+external lit_sign : lit -> bool = "minisat_lit_sign"

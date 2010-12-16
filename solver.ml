@@ -119,7 +119,10 @@ let solve file =
   end
   else begin
     Printf.printf "unsat\n";
-    ignore(solver#conflict)
+    Array.iter (fun lit -> 
+      Printf.printf "%d%s " 
+      (Minisat.lit_to_var lit) (if Minisat.lit_sign lit then "" else "-")
+    ) (solver#conflict)
   end
 ;;
 

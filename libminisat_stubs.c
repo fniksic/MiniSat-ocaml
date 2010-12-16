@@ -22,6 +22,9 @@ extern "C"
   CAMLprim value minisat_new_var(value solver);
   CAMLprim value minisat_pos_lit(value v);
   CAMLprim value minisat_neg_lit(value v);
+  CAMLprim value minisat_lit_to_var(value v);
+  CAMLprim value minisat_lit_sign(value v);
+  CAMLprim value minisat_mklit(value v);
   CAMLprim value minisat_add_clause(value solver, value clause);
   CAMLprim value minisat_simplify(value solver);
   CAMLprim value minisat_conflict(value solver);
@@ -103,19 +106,39 @@ CAMLprim value minisat_del(value solver) {
 CAMLprim value minisat_new_var(value solver) {
   CAMLparam1 (solver);
   Solver* _solver = solver_val(solver);
-  CAMLreturn(Val_int(_solver->newVar()));
+  CAMLreturn(Val_int(toInt(_solver->newVar())));
 }
 
+// There is a 1-1 releation between literals and variables
+// a variable associated to a literal is var = lit >> 1
+// and the literal associated to a variable is lit = var + var + (int)sign
+// hence I can encode both literal and variables as integers.
+// XXX keep an eye on the Lit structure in SolverTypes.h
+CAMLprim value minisat_lit_to_var(value v) {
+  CAMLparam1(v);
+  CAMLreturn(Val_int(toInt(var(toLit(Int_val(v))))));
+}
+
+CAMLprim value minisat_lit_sign(value lit) {
+  CAMLparam1(lit);
+  CAMLreturn(Val_bool(sign(toLit(Int_val(lit)))));
+}
 
 CAMLprim value minisat_pos_lit(value v) {
-  CAMLparam0 ();
+  CAMLparam1(v);
   CAMLreturn(Val_int(toInt(mkLit(Int_val(v),true))));
 }
 
 CAMLprim value minisat_neg_lit(value v) {
-  CAMLparam0 ();
+  CAMLparam1(v);
   CAMLreturn(Val_int(toInt(mkLit(Int_val(v),false))));
 }
+
+CAMLprim value minisat_mklit(value v, value sign) {
+  CAMLparam2(v,sign);
+  CAMLreturn(Val_int(toInt(mkLit(Int_val(v),Bool_val(sign)))));
+}
+
 
 CAMLprim value minisat_add_clause(value solver, value clause) {
   CAMLparam2 (solver, clause);
@@ -203,3 +226,5 @@ CAMLprim value minisat_value_of(value solver, value v) {
 
   CAMLreturn(Val_lbool(_solver->value(var)));
 }
+
+
