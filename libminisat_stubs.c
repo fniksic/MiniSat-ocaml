@@ -74,7 +74,7 @@ static inline void clause_val(value arr, vec<Lit>& clause) {
 
 }
 
-CAMLprim value Val_clause(vec<Lit>& clause) {
+CAMLprim value Val_clause(LSet& clause) {
   value arr;
   arr = caml_alloc(clause.size(), 0);
   for (int i = 0; i < clause.size(); i++) {
